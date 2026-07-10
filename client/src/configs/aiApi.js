@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const aiApi = axios.create({
-    baseURL: "http://127.0.0.1:8000/api",
+    baseURL: "https://resume-builder-2-8dbm.onrender.com",
 });
 
 export default aiApi;
