@@ -25,6 +25,36 @@ const TemplateSelector = ({selectedTemplate,onChange}) => {
             name:"Minimal",
             preview:"Ultra-clean design that puts your content front and center"
         },
+        {
+            id: "professional-sidebar",
+            name: "Professional Sidebar",
+            preview:"A modern two-column resume featuring a professional sidebar for contact details, skills, and education with a clean, ATS-friendly layout."
+        },
+        {
+            id: "timeline",
+            name: "Timeline",
+            preview: "A career-focused layout with a connected vertical timeline highlighting your experience progression."
+        },
+        {
+            id: "elegant",
+            name: "Elegant",
+            preview: "A refined serif-based design with a centered header, perfect for executive and academic resumes."
+        },
+        {
+            id: "compact",
+            name: "Compact",
+            preview: "A dense two-column layout that fits more content on a single page without feeling cluttered."
+        },
+        {
+            id: "bold-header",
+            name: "Bold Header",
+            preview: "A striking full-width color banner header with pill-style section labels for a confident, creative look."
+        },
+        {
+            id: "technical",
+            name: "Technical",
+            preview: "A developer-inspired design with monospace accents and code-style section headers, built for tech roles."
+        },
     ]
   return (
     <div className='relative'>
@@ -32,20 +62,22 @@ const TemplateSelector = ({selectedTemplate,onChange}) => {
             <Layout size={14}/> <span className='max-sm:hidden'>Template</span>
         </button>
         {isOpen && (
-            <div className='absolute top-full w-sm p-3 mt-2 space-y-3 z-10 bg-white rounded-md border border-gray-200 shadow-sm'>
+            <div className='flex flex-col gap-1 w-72 max-h-80 overflow-y-auto absolute top-full left-0 p-2 mt-2 z-10 bg-white rounded-md border border-gray-200 shadow-sm [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-gray-100 [&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-thumb]:rounded-full'>
                 {templates.map((template)=>(
-                    <div key={template.id} onClick={()=>{onChange(template.id);setIsOpen(false)}} className={`relative p-3 border rounded-md cursor-pointer transition-all ${selectedTemplate===template.id ? "border-blue-400 bg-blue-100":"border-gray-300 hover:border-gray-400 hover:bg-gray-100"}`}>
-                        {selectedTemplate===template.id &&(
-                            <div className='absolute top-2 right-2'>
-                                <div className='size-5 bg-blue-400 rounded-full flex items-center justify-center'>
+                    <div
+                        key={template.id}
+                        onClick={()=>{onChange(template.id);setIsOpen(false)}}
+                        className={`relative shrink-0 p-2.5 rounded-lg cursor-pointer transition-colors ${selectedTemplate===template.id ? "bg-blue-50" : "hover:bg-gray-50"}`}
+                    >
+                        <div className='flex items-center justify-between gap-2'>
+                            <h4 className='text-sm font-medium text-gray-800'>{template.name}</h4>
+                            {selectedTemplate===template.id && (
+                                <div className='size-5 bg-blue-400 rounded-full flex items-center justify-center shrink-0'>
                                     <Check className='w-3 h-3 text-white'/>
                                 </div>
-                            </div>
-                        )}
-                        <div className='space-y-1'>
-                            <h4 className='font-medium text-gray-800'>{template.name}</h4>
-                            <div className='mt-2 p-2 bg-blue-50 rounded text-xs text-gray-500 italic'>{template.preview}</div>
+                            )}
                         </div>
+                        <p className='mt-1 text-xs text-gray-500 italic leading-snug'>{template.preview}</p>
                     </div>
                 ))}
             </div>

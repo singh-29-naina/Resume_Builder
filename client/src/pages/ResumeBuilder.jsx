@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { dummyResumeData } from '../assets/assets'
+// import { dummyResumeData } from '../assets/assets'
 import { ArrowLeftIcon, Briefcase, ChevronLeft, ChevronRight, DownloadIcon, EyeIcon, EyeOffIcon, FileText, Folder, FolderIcon, GraduationCap, Share, Share2Icon, Sparkles, User } from 'lucide-react'
 import PersonalInfoForm from '../components/PersonalInfoForm'
 import ResumePreview from '../components/ResumePreview'
@@ -11,8 +11,12 @@ import ExperienceForm from '../components/ExperienceForm'
 import EducationForm from '../components/EducationForm'
 import ProjectForm from '../components/ProjectForm'
 import SkillsForm from '../components/SkillsForm'
+import { useSelector } from "react-redux";
+import api from "../configs/api";
+import toast from "react-hot-toast";
 
 const ResumeBuilder = () => {
+  const { token } = useSelector((state) => state.auth);;
   const {resumeId} = useParams()
   const [resumeData,setResumeData]=useState({
     _id:'',
@@ -27,13 +31,23 @@ const ResumeBuilder = () => {
     accent_color:"#3B82F6",
     public:false,
   })
-  const loadExistingResume = async ()=>{
-        const resume =dummyResumeData.find(resume=>resume._id===resumeId)
-        if(resume){
-          setResumeData(resume)
-          document.title = resume.title
+  const loadExistingResume = async () => {
+    try {
+      const { data } = await api.get(
+        `/api/resumes/get/${resumeId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         }
-  }
+      );
+
+      setResumeData(data.resume);
+      document.title = data.resume.title;
+    } catch (error) {
+      toast.error(error?.response?.data?.message || error.message);
+    }
+  };
   const [activeSectionIndex,setActiveSectionIndex]=useState(0)
   const[removeBackground,setRemoveBackground]=useState(false);
 
@@ -45,36 +59,60 @@ const ResumeBuilder = () => {
     {id:"projects",name:"Projects",icon:FolderIcon},
     {id:"skills",name:"Skills",icon:Sparkles},
   ]
-const activeSection = sections[activeSectionIndex]
+  const activeSection = sections[activeSectionIndex]
 
-  useEffect(()=>{
-    loadExistingResume()
-  },[])
+  useEffect(() => {
+    if (token && resumeId) {
+      loadExistingResume();
+    }
+  }, [token, resumeId]);
 
-const changeResumeVisibility = async ()=>{
-  setResumeData(prev=>({
-    ...resumeData, public: !resumeData.public
-  }))
-}
-
-const handleShare = ()=>{
-  const frontendUrl = window.location.href.split('/app/')[0];
-  const resumeUrl = frontendUrl + '/view/'+resumeId;
-
-  if(navigator.share){
-    navigator.share({url:resumeUrl, text: "My Resume", })
-  }else{
-    alert('Share not supported on this browser.')
+  const changeResumeVisibility = async ()=>{
+    setResumeData(prev=>({
+      ...resumeData, public: !resumeData.public
+    }))
   }
-}
-const downloadResume = ()=>{
-  window.print();
-}
+
+  const handleShare = ()=>{
+    const frontendUrl = window.location.href.split('/app/')[0];
+    const resumeUrl = frontendUrl + '/view/'+resumeId;
+
+    if(navigator.share){
+      navigator.share({url:resumeUrl, text: "My Resume", })
+    }else{
+      alert('Share not supported on this browser.')
+    }
+  }
+  const downloadResume = ()=>{
+    window.print();
+  }
+  const saveResume = async () => {
+    try {
+      await api.put(
+        "/api/resumes/update",
+        {
+          resumeId,
+          resumeData,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      toast.success("Resume saved successfully");
+    } catch (error) {
+      toast.error(
+        error?.response?.data?.message || "Failed to save resume"
+      );
+    }
+  };
 
   return (
-    <div>
+    <div className='min-h-screen bg-gradient-to-b from-[#0F2854] via-[#4988C4] to-[#9dc7e5'>
       <div className='max-w-7xl mx-auto px-4 py-6'>
-        <Link to={'/app'} className='inline-flex gap-2 items-center text-slate-500 hover:text-slate-700 transition-all'>
+        <Link to={'/app'} className='inline-flex gap-2 items-center text-[#4988C4] hover:text-slate-700 transition-all'>
             <ArrowLeftIcon className='size-4'/>Back to Dashboard
         </Link>
       </div>
@@ -90,24 +128,51 @@ const downloadResume = ()=>{
                   {/* Progress bar using activeSectionIndex */}
 
                   <hr className='absolute top-0 left-0 right-0 border-2 border-gray-200'/>
-                  <hr className='absolute top-0 left-0 h-1 bg-gradient-to-r from-green-500 to-green-600 border-none transition-all duration-2000' style={{width:`${activeSectionIndex * 100 / (sections.length-1)}%`}}/>
+                  <hr className='absolute top-0 left-0 h-1 bg-gradient-to-r from-[#1C4D8D] to-[#4988C4] border-none transition-all duration-2000' style={{width:`${activeSectionIndex * 100 / (sections.length-1)}%`}}/>
 
                   {/* Section Navigation */}
 
                   <div className='flex justify-between items-center mb-6 border-b border-gray-300 py-1'>
 
                   <div className='flex  items-center gap-2'>
-                    <TemplateSelector selectedTemplate={resumeData.template} onChange={(template)=>setResumeData(prev => ({...prev, template}))}/>
-                      <ColorPicker selectedColor={resumeData.accent_color} onChange={(color)=>setResumeData(prev => ({...prev,accent_color:color}))}/>
+                    <TemplateSelector
+                      selectedTemplate={resumeData.template}
+                      onChange={async (template) => {
+                          setResumeData(prev => ({
+                              ...prev,
+                              template,
+                          }));
+
+                          try {
+                              await api.put(
+                                  "/api/resumes/update",
+                                  {
+                                      resumeId,
+                                      resumeData: {
+                                          template,
+                                      },
+                                  },
+                                  {
+                                      headers: {
+                                          Authorization: `Bearer ${token}`,
+                                      },
+                                  }
+                              );
+                          } catch (error) {
+                              toast.error("Couldn't save template");
+                          }
+                      }}
+                  />
+                  <ColorPicker selectedColor={resumeData.accent_color} onChange={(color)=>setResumeData(prev => ({...prev,accent_color:color}))}/>
                   </div>
 
                   <div className='flex items-center'>
                     {activeSectionIndex !==0 && (
-                      <button onClick={()=>setActiveSectionIndex((prevIndex)=>Math.max(prevIndex-1,0))} className='flex items-center gap-1 p-3 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition-all' disabled={activeSectionIndex===0}>
+                      <button onClick={()=>setActiveSectionIndex((prevIndex)=>Math.max(prevIndex-1,0))} className='flex items-center gap-1 p-3 rounded-lg text-sm font-medium text-[#3696ef] hover:bg-gray-50 transition-all' disabled={activeSectionIndex===0}>
                         <ChevronLeft className='size-4'/> Previous
                       </button>
                     )}
-                    <button onClick={()=>setActiveSectionIndex((prevIndex)=>Math.min(prevIndex+1,sections.length-1))} className={`flex items-center gap-1 p-3 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition-all ${activeSectionIndex===sections.length-1 && 'opacity-50'}`}disabled={activeSectionIndex===sections.length-1}>
+                    <button onClick={()=>setActiveSectionIndex((prevIndex)=>Math.min(prevIndex+1,sections.length-1))} className={`flex items-center gap-1 p-3 rounded-lg text-sm font-medium text-[#3696ef] hover:bg-gray-50 transition-all ${activeSectionIndex===sections.length-1 && 'opacity-50'}`}disabled={activeSectionIndex===sections.length-1}>
                         Next <ChevronRight className='size-4'/> 
                       </button>
                     </div>
@@ -140,7 +205,7 @@ const downloadResume = ()=>{
                           )}
 
                     </div>
-                    <button className='bg-gradient-to-br from-green-100 to-green-200 ring-green-300 text-green-600 ring hover:ring-green-400 transition-all rounded-md px-6 py-2 mt-6 text-sm'>
+                    <button onClick={saveResume} className='bg-[#0F2854] text-white hover:bg-[#1C4D8D] transition-all rounded-full px-6 py-2 mt-6 text-sm font-medium'>
                       Save Changes
                     </button>
                 </div>
@@ -152,15 +217,15 @@ const downloadResume = ()=>{
 
                       <div className='absolute bottom-3 left-0 right-0 flex items-center justify-end gap-2'>
                           {resumeData.public && (
-                            <button onClick={handleShare} className='flex items-center p-2 px-4 gap-2 text-xs bg-gradient-to-br from-blue-200 text-blue-600 rounded-lg ring-blue-300 hover:ring transition-colors'>
+                            <button onClick={handleShare} className='flex items-center p-2 px-4 gap-2 text-xs bg-[#BDE8F5] text-[#0F2854] rounded-lg hover:bg-white ring-1 ring-[#4988C4]/40 transition-colors'>
                               <Share2Icon className='size-4'/>Share
                             </button>
                           )}
-                          <button onClick={changeResumeVisibility} className='flex items-center p-2 px-4 gap-2 text-xs bg-gradient-to-br from-purple-100 to-purple-200 text-purple-200 text-purple-600 ring-purple-300 rounded-lg hover:ring transition-colors'>
+                          <button onClick={changeResumeVisibility} className='flex items-center p-2 px-4 gap-2 text-xs bg-[#1C4D8D]/10 text-[#1C4D8D] ring-1 ring-[#1C4D8D]/30 rounded-lg hover:bg-[#1C4D8D]/20 transition-colors'>
                             {resumeData.public ? <EyeIcon className='size-4'/>: <EyeOffIcon className='size-4'/>}
                             {resumeData.public ? 'public':'private'}
                           </button>
-                          <button onClick={downloadResume} className='flex items-center gap-2 px-6 py-2 text-xs bg-gradient-to-br from-green-100 to-green-200 text-green-600 rounded-lg ring-green-300 hover:ring transition-colors'>
+                          <button onClick={downloadResume} className='flex items-center gap-2 px-6 py-2 text-xs bg-[#0F2854] text-white rounded-lg hover:bg-[#1C4D8D] transition-colors'>
                             <DownloadIcon className='size-4'/>Download
 
                           </button>

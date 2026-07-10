@@ -1,6 +1,6 @@
 import { Plus, Trash2 } from 'lucide-react';
 import React from 'react'
-
+import AIEnhanceButton from "./AIEnhanceButton";
 const ProjectForm = ({data,onChange}) => {
     const addProject =()=> {
     const newProject = {
@@ -52,7 +52,14 @@ const updateProject = (index, field, value)=>{
                             <input value={project.name || ""} onChange={(e)=>updateProject(index, "name",e.target.value)} type="text" placeholder='Project Name' className='px-3 py-2 text-sm rounded-lg' />
                             
                             <input value={project.type || ""} onChange={(e)=>updateProject(index, "type",e.target.value)} type="text" placeholder='Project Type' className='px-3 py-2 text-sm rounded-lg' />
-
+                             <div className='flex items-center justify-between'>
+                                <label className='text-sm font-medium text-gray-700' >Project Description</label>
+                                <AIEnhanceButton
+                                    text={project.description}
+                                    endpoint="/api/ai/project-summary"
+                                    onEnhanced={(enhancedText) => updateProject(index, "description", enhancedText)}
+                                />
+                            </div>
                             <textarea rows={4} value={project.description || ""} onChange={(e)=>updateProject(index, "description",e.target.value)}  placeholder='Describe your project...' className='w-full px-3 py-2 text-sm rounded-lg resize-none' />
                             
                         </div>                           

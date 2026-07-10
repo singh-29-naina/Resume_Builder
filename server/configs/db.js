@@ -2,7 +2,8 @@ import mongoose from "mongoose";
 
 const connectDB = async () => {
     try {
-        // Force IPv4 and add better timeout settings
+        // Force IPv4 and add better timeout 
+        
         const connect = await mongoose.connect(process.env.MONGODB_URI, {
             family: 4, // Force IPv4 (this often fixes ECONNREFUSED)
             serverSelectionTimeoutMS: 10000, // Timeout after 10s

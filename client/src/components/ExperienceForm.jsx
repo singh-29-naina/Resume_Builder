@@ -1,6 +1,6 @@
 import { Briefcase, Plus, Sparkle, Sparkles, Trash2 } from 'lucide-react'
 import React from 'react'
-
+import AIEnhanceButton from "./AIEnhanceButton";
 const ExperienceForm = ({data,onChange}) => {
 
 const addExperience =()=> {
@@ -73,10 +73,11 @@ const updateExperience = (index, field, value)=>{
                         <div className='space-y-2'>
                             <div className='flex items-center justify-between'>
                                 <label className='text-sm font-medium text-gray-700' >Job Description</label>
-                                <button className='flex items-center gap-1 px-2 py-1 text-xs bg-purple-100 text-purple-700 rounded hover:bg-purple-200 transition-colors disabled:opacity-50'>
-                                    <Sparkles className='w-3 h-3'/>
-                                    Enhance with AI
-                                </button>
+                                <AIEnhanceButton
+                                    text={experience.description}
+                                    endpoint="/api/ai/enhance-job-desc"
+                                    onEnhanced={(enhancedText) => updateExperience(index, "description", enhancedText)}
+                                />
                             </div>
                             <textarea value={experience.description || ""} rows={4}  onChange={(e)=>updateExperience(index,"description", e.target.value)} className='w-full text-sm px-3 py-2 rounded-lg resize-none' placeholder='Describe your key responsibilities and achievements...'/>
                         </div>

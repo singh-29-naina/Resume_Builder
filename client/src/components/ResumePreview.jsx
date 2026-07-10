@@ -3,21 +3,39 @@ import MordernTemplate from "./templates/ModernTemplate"
 import ClassicTemplate from "./templates/ClassicTemplate"
 import MinimalTemplate from "./templates/MinimalTemplate"
 import MinimalImageTemplate from "./templates/MinimalImageTemplate"
+import TechnicalTemplate from './templates/Technicaltemplate '
+import SidebarTemplate from './templates/ProfessionalSidebar'
+import ElegantTemplate from './templates/ElegentTemplate'
+import CompactTemplate from './templates/Compacttemplate '
+import TimelineTemplate from './templates/TimelineTemplate'
+import BoldHeaderTemplate from './templates/Boldheadertemplate'
+
+
+
 
 const ResumePreview = ({data,template,accentColor,classes = ""}) => {
     const renderTemplate = ()=>{
         switch(template){
-            case"modern":
-            return <MordernTemplate data={data} accentColor={accentColor}/>;
-            case"minimal":
-            return <MinimalTemplate data={data} accentColor={accentColor}/>;
-            case"minimal-image":
-            return <MinimalImageTemplate data={data} accentColor={accentColor}/>;
+            case "modern":
+                return <MordernTemplate data={data} accentColor={accentColor}/>;
+            case "minimal":
+                return <MinimalTemplate data={data} accentColor={accentColor}/>;
+            case "minimal-image":
+                return <MinimalImageTemplate data={data} accentColor={accentColor}/>;
+            case "professional-sidebar":
+                return <SidebarTemplate data={data} accentColor={accentColor}/>;
+            case "timeline":
+                return <TimelineTemplate data={data} accentColor={accentColor}/>;
+            case "elegant":
+                return <ElegantTemplate data={data} accentColor={accentColor}/>;
+            case "compact":
+                return <CompactTemplate data={data} accentColor={accentColor}/>;
+            case "bold-header":
+                return <BoldHeaderTemplate data={data} accentColor={accentColor}/>;
+            case "technical":
+                return <TechnicalTemplate data={data} accentColor={accentColor}/>;
             default:
-            return <ClassicTemplate data={data} accentColor={accentColor}/>;
-            
-
-        
+                return <ClassicTemplate data={data} accentColor={accentColor}/>;
         }
     }
   return (
@@ -26,7 +44,7 @@ const ResumePreview = ({data,template,accentColor,classes = ""}) => {
             {renderTemplate()}
         </div>
 
-        <style jsx>
+        <style >
             {`
                 @page{
                    size:letter;
