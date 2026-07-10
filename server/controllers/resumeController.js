@@ -1,7 +1,7 @@
 // controller for creating a new resume
 // POST: /api/resumes/create
 
-import imagekit from "../configs/imagekit.js";
+import imagekit from "../configs/imageKit.js";
 import Resume from "../models/Resume.js";
 import fs from 'fs'
 export const createResume = async(req,res)=>{

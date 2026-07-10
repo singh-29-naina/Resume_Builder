@@ -54,7 +54,7 @@ const resumeSchema = new mongoose.Schema({
             type:String,
             default:''
         },
-        linkedlin:{
+        linkedin:{
             type:String,
             default:''
         },
